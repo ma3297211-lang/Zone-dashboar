@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ups and Downs Dashboard</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --orange: #FF6B00;
+  --orange-light: #FF8C00;
+  --bg: #0d0d0d;
+  --bg2: #1a1a1a;
+  --bg3: #242424;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #f5f5f5;
+  --text2: #a0a0a0;
+}
+body { font-family: 'Segoe UI', -apple-system, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #1a0a00, #2d1200);
+  border-bottom: 2px solid var(--orange);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 14px; }
+.talabat-logo { background: var(--orange); color: #fff; font-size: 11px; font-weight: 900; padding: 5px 10px; border-radius: 6px; letter-spacing: 1px; text-transform: uppercase; }
+.header-title { font-size: 18px; font-weight: 900; color: var(--text); }
+.header-zone-name { font-size: 13px; color: var(--orange); font-weight: 700; margin-top: 2px; }
+.header-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.refresh-btn { background: var(--orange); border: none; color: #fff; border-radius: 8px; padding: 8px 18px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.refresh-btn:hover { background: var(--orange-light); }
+
+/* MAIN */
+.main { padding: 20px 24px; max-width: 1280px; margin: 0 auto; }
+
+/* ZONE TABS */
+.zone-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.zone-btn { border-radius: 10px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,107,0,0.2); background: var(--bg2); color: var(--text2); transition: all 0.2s; }
+.zone-btn.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+.zone-btn:hover:not(.active) { border-color: var(--orange); color: var(--text); }
+
+/* VIEW TABS */
+.view-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.view-btn { border-radius: 8px; padding: 7px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: var(--bg3); color: var(--text2); transition: all 0.2s; }
+.view-btn.active { background: rgba(255,107,0,0.2); border-color: var(--orange); color: var(--orange); }
+
+/* HERO */
+.zone-hero {
+  background: linear-gradient(135deg, rgba(255,107,0,0.12), rgba(255,107,0,0.05));
+  border: 1px solid rgba(255,107,0,0.3); border-radius: 14px; padding: 18px 24px;
+  margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+}
+.zone-hero-name { font-size: 24px; font-weight: 900; color: var(--orange); }
+.zone-hero-date { color: var(--text2); font-size: 12px; margin-top: 4px; }
+.hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
+.hero-stat { text-align: center; }
+.hero-stat-val { font-size: 26px; font-weight: 900; }
+.hero-stat-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+/* VEHICLE FILTER */
+.vehicle-tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.vehicle-btn { border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); background: var(--bg3); color: var(--text2); transition: all 0.2s; }
+.vehicle-btn.active { background: rgba(255,107,0,0.15); border-color: rgba(255,107,0,0.4); color: var(--orange); }
+
+/* SECTION LABEL */
+.section-label { font-size: 11px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,107,0,0.15); }
+
+/* METRICS GRID */
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; margin-bottom: 24px; }
+.metric-card { border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 5px; border: 1px solid rgba(255,255,255,0.07); background: var(--bg2); transition: transform 0.15s, border-color 0.15s; }
+.metric-card:hover { transform: translateY(-2px); border-color: rgba(255,107,0,0.3); }
+.metric-card.positive { background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.25); }
+.metric-card.negative { background: rgba(239,68,68,0.07); border-color: rgba(239,68,68,0.25); }
+.metric-label { font-size: 10px; color: var(--text2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+.metric-value-row { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
+.metric-value { font-size: 22px; font-weight: 800; color: var(--text); }
+.metric-delta { font-size: 11px; font-weight: 700; }
+.delta-up { color: var(--green); }
+.delta-down { color: var(--red); }
+.metric-prev { font-size: 11px; color: var(--text2); }
+
+/* WEEKLY TABLE */
+.weekly-table-wrap { overflow-x: auto; margin-bottom: 24px; border-radius: 10px; border: 1px solid rgba(255,107,0,0.15); }
+.weekly-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.weekly-table th { background: rgba(255,107,0,0.15); color: var(--orange); padding: 10px 12px; text-align: center; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.weekly-table td { padding: 9px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: nowrap; color: var(--text); font-size: 13px; font-weight: 600; }
+.weekly-table tr:hover td { background: rgba(255,107,0,0.05); }
+.weekly-table tr:last-child td { border-bottom: none; }
+.weekly-table td:first-child { color: var(--orange); font-weight: 800; font-size: 14px; }
+
+/* HISTORY TABLE */
+.history-table-wrap { overflow-x: auto; margin-bottom: 24px; border-radius: 10px; border: 1px solid rgba(255,107,0,0.15); }
+.history-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.history-table th { background: rgba(255,107,0,0.15); color: var(--orange); padding: 10px 12px; text-align: center; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; position: sticky; top: 0; }
+.history-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.04); white-space: nowrap; color: var(--text); }
+.history-table tr:hover td { background: rgba(255,107,0,0.05); }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table td:first-child { color: var(--text2); font-size: 11px; text-align: left; }
+.td-good { color: var(--green) !important; font-weight: 700; }
+.td-bad { color: var(--red) !important; font-weight: 700; }
+
+/* NO DATA */
+.no-data-box { background: rgba(255,107,0,0.06); border: 1px solid rgba(255,107,0,0.2); border-radius: 12px; padding: 40px 24px; text-align: center; color: var(--text2); font-size: 14px; margin-bottom: 20px; }
+.no-data-box strong { display: block; color: var(--orange); font-size: 18px; margin-bottom: 8px; }
+
+.error-box { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 10px; padding: 16px; color: #fca5a5; margin-bottom: 20px; font-size: 14px; }
+.loading { text-align: center; padding: 60px; color: var(--text2); font-size: 15px; }
+
+/* FOOTER */
+.footer { text-align: center; margin-top: 40px; color: #555; font-size: 12px; padding-bottom: 30px; }
+.footer span { color: var(--orange); font-weight: 700; }
+
+@media (max-width: 600px) {
+  .main { padding: 12px; }
+  .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+  .zone-hero-name { font-size: 18px; }
+  .hero-stat-val { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="talabat-logo">talabat</div>
+    <div>
+      <div class="header-title">Ups and Downs Dashboard</div>
+      <div class="header-zone-name" id="header-zone-name">—</div>
+      <div class="header-sub" id="last-updated">Loading...</div>
+    </div>
+  </div>
+  <button class="refresh-btn" onclick="loadData()" id="refresh-btn">🔄 Refresh</button>
+</div>
+
+<div class="main">
+  <div class="zone-tabs" id="zone-tabs"></div>
+  <div id="content"></div>
+  <div class="footer">Talabat Zone Dashboard • <span>Mahmoud Younis</span></div>
+</div>
+
+<script>
+const DATA_URL = "https://raw.githubusercontent.com/ma3297211-lang/Zone-dashboar/main/data.json";
+
+// ── ZONE DEFINITIONS ──
+// headerRow[27] = WH Target value, headerRow[29] = UTR target value  (index 0-based in the first array row)
+const ZONES = [
+  { id:"CCC",     label:"Cairo City Centre", emoji:"🏙️", key:"CCC",             vehicleMatch:"cairo_city_centre", whTarget:7960,  utrTarget:1.94 },
+  { id:"Giza",    label:"Giza",              emoji:"🕌", key:"Giza",            vehicleMatch:"giza",              whTarget:11850, utrTarget:1.83 },
+  { id:"Hadayek", label:"Hadayek el Ahram",  emoji:"🌆", key:"Hadayek",          vehicleMatch:"hadayek",           whTarget:5780,  utrTarget:1.83 },
+];
+
+// ── TODAY vs YESTERDAY columns (zone daily rows) ──
+const ZONE_METRICS = [
+  { label:"Run Rate %",      col:7,  pct:true,  up:true  },
+  { label:"Lost Orders",     col:6,  pct:false, up:false },
+  { label:"Orders",          col:8,  pct:false, up:true  },
+  { label:"WH",              col:9,  pct:false, up:true  },
+  { label:"UTR",             col:10, pct:false, up:true  },
+  { label:"Fail Rate %",     col:11, pct:true,  up:false },
+  { label:"TR Fail %",       col:12, pct:true,  up:false },
+  { label:"DT",              col:13, pct:false, up:false },
+  { label:"RAT",             col:14, pct:false, up:false },
+  { label:"AR %",            col:15, pct:true,  up:true  },
+  { label:"Order On Time %", col:16, pct:true,  up:true  },
+  { label:"Idle Time %",     col:17, pct:true,  up:false },
+  { label:"Breaks %",        col:18, pct:true,  up:false },
+  { label:"Active Riders",   col:19, pct:false, up:true  },
+  { label:"No Show %",       col:20, pct:true,  up:false },
+  { label:"AVP %",           col:21, pct:true,  up:true  },
+  { label:"AVG WH/Rider",    col:22, pct:false, up:true  },
+  { label:"Fill Rate %",     col:23, pct:true,  up:true  },
+  { label:"Late Login %",    col:24, pct:true,  up:false },
+];
+
+// ── WEEKLY SUMMARY columns ──
+// Actual data.json weekly row structure (0-based):
+// ["","","","", Week(4), RunRate%(5), LostOrders(6), Orders(7), WH(8), UTR(9),
+//  FailRate%(10), TRFail(11), DT(12), RAT(13), AR(14),
+//  OrderOnTime(15), IdleTime%(16), Breaks%(17), Active(18), NoShow%(19),
+//  AVP%(20), AVGWHperRider(21), FillRate(22), LateLogin(23)]
+const WEEKLY_COLS = [
+  { label:"Run Rate %",      col:5,  pct:true  },
+  { label:"Lost Orders",     col:6,  pct:false },
+  { label:"Orders",          col:7,  pct:false },
+  { label:"WH",              col:8,  pct:false },
+  { label:"UTR",             col:9,  pct:false },
+  { label:"Fail Rate %",     col:10, pct:true  },
+  { label:"TR Fail %",       col:11, pct:true  },
+  { label:"DT",              col:12, pct:false },
+  { label:"RAT",             col:13, pct:false },
+  { label:"AR %",            col:14, pct:true  },
+  { label:"Order On Time %", col:15, pct:true  },
+  { label:"Idle Time %",     col:16, pct:true  },
+  { label:"Breaks %",        col:17, pct:true  },
+  { label:"Active",          col:18, pct:false },
+  { label:"No Show %",       col:19, pct:true  },
+  { label:"AVP %",           col:20, pct:true  },
+  { label:"AVG WH/Rider",    col:21, pct:false },
+  { label:"Fill Rate %",     col:22, pct:true  },
+  { label:"Late Login %",    col:23, pct:true  },
+];
+
+// ── HISTORY TABLE columns ──
+const HISTORY_COLS = [
+  { label:"Orders",          col:8,  pct:false, goodFn: v => v > 0 },
+  { label:"WH",              col:9,  pct:false, goodFn: v => v > 0 },
+  { label:"UTR",             col:10, pct:false, goodFn: v => v >= 1.8 },
+  { label:"Run Rate %",      col:7,  pct:true,  goodFn: v => v >= 0.9 },
+  { label:"Lost Orders",     col:6,  pct:false, goodFn: v => v <= 400, invertColor: true },
+  { label:"Fail Rate %",     col:11, pct:true,  goodFn: v => v <= 0.03, invertColor: true },
+  { label:"TR Fail %",       col:12, pct:true,  goodFn: v => v <= 0.005, invertColor: true },
+  { label:"DT",              col:13, pct:false, goodFn: v => v <= 28, invertColor: true },
+  { label:"AR %",            col:15, pct:true,  goodFn: v => v >= 0.96 },
+  { label:"On Time %",       col:16, pct:true,  goodFn: v => v >= 0.95 },
+  { label:"Idle %",          col:17, pct:true,  goodFn: v => v <= 0.2, invertColor: true },
+  { label:"Breaks %",        col:18, pct:true,  goodFn: v => v <= 0.1, invertColor: true },
+  { label:"Active",          col:19, pct:false, goodFn: v => v > 0 },
+  { label:"No Show %",       col:20, pct:true,  goodFn: v => v <= 0.06, invertColor: true },
+  { label:"AVP %",           col:21, pct:true,  goodFn: v => v >= 0.83 },
+  { label:"Fill Rate %",     col:23, pct:true,  goodFn: v => v >= 0.8 },
+  { label:"Late Login %",    col:24, pct:true,  goodFn: v => v <= 0.06, invertColor: true },
+];
+
+// Vehicle metrics
+const VEH_METRICS = [
+  { label:"Orders",      col:4,  pct:false, up:true  },
+  { label:"UTR",         col:5,  pct:false, up:true  },
+  { label:"DT",          col:6,  pct:false, up:false },
+  { label:"WH",          col:7,  pct:false, up:true  },
+  { label:"RAT",         col:8,  pct:false, up:false },
+  { label:"AR %",        col:9,  pct:true,  up:true  },
+  { label:"On Time %",   col:10, pct:true,  up:true  },
+  { label:"Idle Time %", col:11, pct:true,  up:false },
+  { label:"No Show %",   col:13, pct:true,  up:false },
+  { label:"Fill Rate %", col:14, pct:true,  up:true  },
+];
+
+let state = { zone:"CCC", vehicle:"all", view:"today", rawData:null };
+
+// ── HELPERS ──
+function parseNum(v) {
+  if (v === null || v === undefined || v === "" || v === "#DIV/0!") return null;
+  const n = parseFloat(String(v).replace(/,/g,"").replace(/%/g,"").trim());
+  return isNaN(n) ? null : n;
+}
+
+function toDisplay(v, pct) {
+  if (v === null) return null;
+  // Values stored as decimals: 0.91 = 91%, 1.011 = 101.1%
+  // Threshold: if absolute value < 10, treat as decimal and multiply
+  if (pct && Math.abs(v) < 10) return v * 100;
+  return v;
+}
+
+function fmt(v, pct, full) {
+  if (v === null || v === undefined) return "—";
+  const d = toDisplay(v, pct);
+  if (d === null) return "—";
+  if (pct) return d.toFixed(1) + "%";
+  return d % 1 === 0 ? Number(Math.round(d)).toLocaleString() : d.toFixed(2);
+}
+
+function fmtFull(v, pct) {
+  return fmt(v, pct, true);
+}
+
+function fmtDate(d) {
+  if (!d) return "—";
+  const s = String(d);
+  if (s.includes("T")) {
+    try { return new Date(s).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short"}); } catch(e) {}
+  }
+  return s;
+}
+
+function deltaHTML(curr, prev, up, pct) {
+  if (curr === null || prev === null) return "";
+  const c = toDisplay(curr, pct), p = toDisplay(prev, pct);
+  if (c === null || p === null) return "";
+  const diff = c - p;
+  if (Math.abs(diff) < 0.001) return `<span class="metric-delta" style="color:#666">→0</span>`;
+  const positive = up ? diff > 0 : diff < 0;
+  const cls = positive ? "delta-up" : "delta-down";
+  const arrow = diff > 0 ? "▲" : "▼";
+  const abs = Math.abs(diff);
+  const f = abs >= 100 ? abs.toFixed(0) : abs >= 10 ? abs.toFixed(1) : abs.toFixed(2);
+  return `<span class="metric-delta ${cls}">${arrow}${f}${pct?"%":""}</span>`;
+}
+
+function metricCardHTML(label, curr, prev, up, pct) {
+  const c = parseNum(curr), p = parseNum(prev);
+  const cd = toDisplay(c,pct), pd = toDisplay(p,pct);
+  const positive = (cd!==null && pd!==null) ? (up ? cd>=pd : cd<=pd) : null;
+  const cls = positive===null ? "" : positive ? "positive" : "negative";
+  return `<div class="metric-card ${cls}">
+    <div class="metric-label">${label}</div>
+    <div class="metric-value-row">
+      <span class="metric-value">${fmt(c,pct)}</span>
+      ${deltaHTML(c,p,up,pct)}
+    </div>
+    ${pd!==null ? `<div class="metric-prev">Yesterday: ${fmt(p,pct)}</div>` : ""}
+  </div>`;
+}
+
+// ── DATA ACCESS ──
+function getZoneDef() { return ZONES.find(z => z.id === state.zone); }
+
+function getSheetRows() {
+  if (!state.rawData) return [];
+  const zd = getZoneDef();
+  if (state.rawData[zd.key]) return state.rawData[zd.key];
+  // Fallback: case-insensitive
+  const k = Object.keys(state.rawData).find(k => k.toLowerCase() === zd.key.toLowerCase());
+  return k ? state.rawData[k] : [];
+}
+
+function getValidZoneRows() {
+  return getSheetRows().filter(r =>
+    Array.isArray(r) && r[1] && r[4] && String(r[4]).includes("T") && parseNum(r[8]) > 0
+  );
+}
+
+function getWeeklyRows() {
+  const all = getSheetRows();
+  // Weekly summary block header row has "Week" in col[4] and "Run Rate %" in col[5]
+  const wIdx = all.findIndex(r =>
+    Array.isArray(r) &&
+    String(r[4]).toLowerCase().trim() === "week" &&
+    String(r[5]).toLowerCase().includes("run")
+  );
+  if (wIdx === -1) return [];
+  // Data rows: col[4] is the week number, col[5] is RunRate (not #DIV/0!)
+  return all.slice(wIdx+1).filter(r =>
+    Array.isArray(r) &&
+    parseNum(r[4]) > 0 &&
+    r[5] !== "#DIV/0!" &&
+    r[5] !== ""
+  );
+}
+
+// ── RENDER ──
+async function loadData() {
+  document.getElementById("refresh-btn").textContent = "⏳ Loading...";
+  document.getElementById("content").innerHTML = `<div class="loading">⏳ Loading data...</div>`;
+  try {
+    const r = await fetch(DATA_URL + "?t=" + Date.now());
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    state.rawData = await r.json();
+    document.getElementById("last-updated").textContent = "Updated: " + new Date().toLocaleTimeString("en-GB");
+  } catch(e) {
+    document.getElementById("content").innerHTML = `<div class="error-box">❌ ${e.message}</div>`;
+  }
+  document.getElementById("refresh-btn").textContent = "🔄 Refresh";
+  render();
+}
+
+function render() {
+  const zd = getZoneDef();
+  document.getElementById("header-zone-name").textContent = zd ? (zd.emoji + " " + zd.label) : "—";
+  document.getElementById("zone-tabs").innerHTML = ZONES.map(z =>
+    `<button class="zone-btn ${state.zone===z.id?"active":""}" onclick="setZone('${z.id}')">${z.emoji} ${z.label}</button>`
+  ).join("");
+
+  if (!state.rawData) return;
+
+  const validRows = getValidZoneRows();
+
+  // ── HADAYEK or missing data ──
+  if (!validRows.length) {
+    const isHadayek = state.zone === "Hadayek";
+    document.getElementById("content").innerHTML = `
+      <div class="no-data-box">
+        <strong>${zd.emoji} ${zd.label}</strong>
+        ${isHadayek
+          ? "⚠️ Hadayek el Ahram data is not yet included in data.json.<br>Please add the Hadayek sheet to the Apps Script export."
+          : "No data available for this zone."}
+      </div>`;
+    return;
+  }
+
+  const today     = validRows[validRows.length - 1];
+  const yesterday = validRows.length > 1 ? validRows[validRows.length - 2] : null;
+  const weeklyRows = getWeeklyRows();
+
+  // Vehicle rows
+  const vehicleSheet = state.rawData["Vehicle Type Daily and Weekly"] || [];
+  const vm = zd.vehicleMatch.toLowerCase().replace(/_/g," ");
+  const zVehicle = vehicleSheet.filter(r => Array.isArray(r) && r[1] && String(r[1]).toLowerCase().replace(/_/g," ").includes(vm));
+  const validV  = zVehicle.filter(r => parseNum(r[4]) > 0);
+  const vDates  = [...new Set(validV.map(r=>r[2]))];
+  const todayV  = validV.filter(r => r[2] === vDates[vDates.length-1]);
+  const yesterV = validV.filter(r => r[2] === vDates[vDates.length-2]);
+
+  // Hero: WH Target + UTR Target from zone definition (fixed from sheet header)
+  const whT  = zd.whTarget;
+  const utrT = zd.utrTarget;
+
+  const hero = `<div class="zone-hero">
+    <div>
+      <div class="zone-hero-name">${zd.emoji} ${zd.label}</div>
+      <div class="zone-hero-date">📅 ${fmtDate(today[4])} &nbsp;|&nbsp; Week ${today[0]||"—"}</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val" style="color:var(--orange)">${whT !== null ? Number(whT).toLocaleString() : "—"}</div>
+        <div class="hero-stat-label">WH Target</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" style="color:var(--orange)">${utrT !== null ? utrT.toFixed(2) : "—"}</div>
+        <div class="hero-stat-label">UTR Target</div>
+      </div>
+    </div>
+  </div>`;
+
+  const viewTabs = `<div class="view-tabs">
+    <button class="view-btn ${state.view==="today"?"active":""}" onclick="setView('today')">📊 Today vs Yesterday</button>
+    <button class="view-btn ${state.view==="weekly"?"active":""}" onclick="setView('weekly')">📅 Weekly Summary</button>
+    <button class="view-btn ${state.view==="history"?"active":""}" onclick="setView('history')">📆 Monthly History</button>
+  </div>`;
+
+  const vehicleTabs = `<div class="vehicle-tabs">
+    <button class="vehicle-btn ${state.vehicle==="all"?"active":""}" onclick="setVehicle('all')">📊 All</button>
+    <button class="vehicle-btn ${state.vehicle==="Bike"?"active":""}" onclick="setVehicle('Bike')">🏍️ Bike</button>
+    <button class="vehicle-btn ${state.vehicle==="Bicycle"?"active":""}" onclick="setVehicle('Bicycle')">🚲 Bicycle</button>
+  </div>`;
+
+  let mainContent = "";
+
+  // ═══════════════════════════════════
+  // TODAY vs YESTERDAY
+  // ═══════════════════════════════════
+  if (state.view === "today") {
+    if (state.vehicle === "all") {
+      const grid = ZONE_METRICS.map(m => metricCardHTML(m.label, today[m.col], yesterday?.[m.col], m.up, m.pct)).join("");
+      mainContent = `<div class="section-label">📊 Today vs Yesterday</div>${vehicleTabs}<div class="metrics-grid">${grid}</div>`;
+    } else {
+      const tRow = todayV.find(r => r[3] === state.vehicle);
+      const yRow = yesterV.find(r => r[3] === state.vehicle);
+      const icon = state.vehicle === "Bike" ? "🏍️" : "🚲";
+      const grid = VEH_METRICS.map(m => metricCardHTML(m.label, tRow?.[m.col], yRow?.[m.col], m.up, m.pct)).join("");
+      mainContent = `<div class="section-label">${icon} ${state.vehicle} — Today vs Yesterday</div>${vehicleTabs}<div class="metrics-grid">${grid}</div>`;
+    }
+  }
+
+  // ═══════════════════════════════════
+  // WEEKLY SUMMARY — table with all weeks
+  // ═══════════════════════════════════
+  else if (state.view === "weekly") {
+    if (!weeklyRows.length) {
+      mainContent = `<div class="loading">No weekly data available</div>`;
+    } else {
+      const headerCells = WEEKLY_COLS.map(c => `<th>${c.label}</th>`).join("");
+      const bodyRows = weeklyRows.map(r => {
+        const weekNum = parseNum(r[4]);
+        const cells = WEEKLY_COLS.map(c => {
+          const v = parseNum(r[c.col]);
+          return `<td>${fmtFull(v, c.pct)}</td>`;
+        }).join("");
+        return `<tr><td>Week ${weekNum||"—"}</td>${cells}</tr>`;
+      }).join("");
+      mainContent = `
+        <div class="section-label">📅 Weekly Summary — All Weeks</div>
+        <div class="weekly-table-wrap">
+          <table class="weekly-table">
+            <thead><tr><th>WEEK</th>${headerCells}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </div>`;
+    }
+  }
+
+  // ═══════════════════════════════════
+  // MONTHLY HISTORY — all daily rows
+  // ═══════════════════════════════════
+  else if (state.view === "history") {
+    const rows = [...validRows].reverse();
+    const headerCells = HISTORY_COLS.map(c => `<th>${c.label}</th>`).join("");
+    const bodyRows = rows.map(r => {
+      const cells = HISTORY_COLS.map(c => {
+        const v = parseNum(r[c.col]);
+        let cls = "";
+        if (v !== null && c.goodFn) {
+          cls = c.goodFn(v) ? "td-good" : "td-bad";
+        }
+        return `<td class="${cls}">${fmt(v, c.pct)}</td>`;
+      }).join("");
+      return `<tr><td>${fmtDate(r[4])}</td>${cells}</tr>`;
+    }).join("");
+    mainContent = `
+      <div class="section-label">📆 Monthly History — All Days</div>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead><tr><th>DATE</th>${headerCells}</tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  document.getElementById("content").innerHTML = hero + viewTabs + mainContent;
+}
+
+function setZone(id)    { state.zone = id; state.vehicle = "all"; render(); }
+function setVehicle(v)  { state.vehicle = v; render(); }
+function setView(v)     { state.view = v; state.vehicle = "all"; render(); }
+
+loadData();
+</script>
+</body>
+</html>
